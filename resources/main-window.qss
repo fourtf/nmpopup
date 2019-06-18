@@ -1,0 +1,54 @@
+MainWindow {
+    min-width: 350px;
+    min-height: 400px;
+}
+
+QTableView {
+    background: #111;
+    color: #fff;
+    selection-background-color: #3961a3;
+}
+
+/*
+QScrollBar {
+    background: #000;
+    border: none;
+}
+
+QScrollBar::right-arrow:horizontal, QScrollBar::left-arrow:horizontal, QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+    image: none;
+    border: none;
+    background: none;
+    color: none;
+}
+
+QScrollBar::handle {
+    background: #444;
+}
+
+QScrollBar:horizontal {
+    border: 2px solid grey;
+    background: #000;
+    height: 15px;
+    margin: 0px 20px 0 20px;
+}
+QScrollBar::handle:horizontal {
+    background: white;
+    min-width: 20px;
+}
+QScrollBar::add-line:horizontal {
+    border: 2px solid grey;
+    background: #000;
+    width: 20px;
+    subcontrol-position: right;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:horizontal {
+    border: 2px solid grey;
+    background: #000;
+    width: 20px;
+    subcontrol-position: left;
+    subcontrol-origin: margin;
+}
+*/

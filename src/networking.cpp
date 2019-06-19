@@ -133,7 +133,7 @@ void Networking::queryWifiNetworks(bool rescan) {
 }
 
 void Networking::connectWifi(const QString &ssid, const QString &password) {
-  /*auto output =*/runCli({"device", "wifi", "connect", ssid});
+  QProcess::startDetached("nmcli", {"device", "wifi", "connect", ssid});
 }
 
 Networking &networking() {

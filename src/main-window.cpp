@@ -18,6 +18,8 @@
 #include <QDebug>
 
 namespace {
+constexpr int ssidColumn = 1;
+
 QString selectedItem(QTableView *view) {
   return view->currentIndex()
       .siblingAtColumn(1)
@@ -33,7 +35,7 @@ void selectItem(QTableView *view, const QString &selected) {
     }
   } else {
     for (int i = 0; i < view->model()->rowCount(); i++) {
-      auto index = view->model()->index(i, 1);
+      auto index = view->model()->index(i, ssidColumn);
       if (selected == index.data(Qt::DisplayRole).toString()) {
         view->setCurrentIndex(index);
         break;
@@ -100,6 +102,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *e) {
 void MainWindow::initLayout() {
   this->setCentralWidget(ab::makeWidget<QWidget>([=](QWidget *w) {
     w->setLayout(ab::makeLayout<QVBoxLayout>({
+        // table view containing list of wifi networks
         ab::makeWidget<QTableView>([=](QTableView *w) {
           this->wifiList_ = w;
           w->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -113,11 +116,12 @@ void MainWindow::initLayout() {
           w->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
           w->horizontalHeader()->hide();
 
-          QObject::connect(w, &QTableView::doubleClicked, this,
-                           [=](const QModelIndex &index) {
-                             networking().connectWifi(
-                                 this->model_->data(index).toString());
-                           });
+          QObject::connect(
+              w, &QTableView::doubleClicked, this,
+              [=](const QModelIndex &index) {
+                networking().connectWifi(
+                    index.siblingAtColumn(ssidColumn).data().toString());
+              });
         }),
     }));
   }));

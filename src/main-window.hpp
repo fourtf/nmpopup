@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QTime>
 
 class NetworkTableModel;
 class QTableView;
@@ -17,6 +18,7 @@ private:
   void initLayout();
   QString selectedWifi();
 
+  QTime creationTime_; // used to delay keyboard enter input
   NetworkTableModel *model_{};
   QTableView *wifiList_{};
 };

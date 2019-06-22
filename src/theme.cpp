@@ -15,7 +15,7 @@ Theme &theme() {
 }
 
 void Theme::loadInternalDarkTheme() {
-  QFile file(":/main-window.qss");
+  QFile file(":/dark.qss");
   file.open(QIODevice::ReadOnly);
   this->qss = QString(file.readAll());
 }
@@ -54,5 +54,5 @@ void Theme::installDarkTheme() {
 
 void Theme::installInternalStyle(const QString &name) {
   QApplication::setStyle(QStyleFactory::create(name));
-  qDebug() << QStyleFactory::keys();
+  // qDebug() << QStyleFactory::keys();
 }

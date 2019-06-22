@@ -19,12 +19,17 @@ void Config::parse(const QStringList &args) {
 
   QString arg;
   while (!(arg = next()).isNull()) {
-    if (arg == "--duplicates") {
+    if (arg == "--help" || arg == "-help" || arg == "?") {
+      command = Command::ShowHelp;
+    } else if (arg == "--duplicates") {
       this->showDuplicates = true;
     } else if (arg == "--borderless") {
       this->borderless = true;
-    } else {
+    } else if (arg == "--preserve-style") {
+      this->darkPalette = false;
+    } else if (arg.startsWith("--")) {
       qWarning() << "unknown argument " << arg;
     }
+    // We skip commands that start with "-" since they might be qt arguments.
   }
 }

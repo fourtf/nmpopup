@@ -18,42 +18,43 @@
 #include <QDebug>
 
 namespace {
-constexpr int ssidColumn = 1;
+  constexpr int ssidColumn = 1;
 
-QString selectedItem(QTableView *view) {
-  return view->currentIndex()
-      .siblingAtColumn(1)
-      .data(Qt::DisplayRole)
-      .toString();
-}
+  QString selectedItem(QTableView *view) {
+    return view->currentIndex()
+        .siblingAtColumn(1)
+        .data(Qt::DisplayRole)
+        .toString();
+  }
 
-void selectItem(QTableView *view, const QString &selected) {
-  // keep selection
-  if (selected.isNull()) {
-    if (view->model()->rowCount() > 0) {
-      view->setCurrentIndex(view->model()->index(0, 0));
-    }
-  } else {
-    for (int i = 0; i < view->model()->rowCount(); i++) {
-      auto index = view->model()->index(i, ssidColumn);
-      if (selected == index.data(Qt::DisplayRole).toString()) {
-        view->setCurrentIndex(index);
-        break;
+  void selectItem(QTableView *view, const QString &selected) {
+    // keep selection
+    if (selected.isNull()) {
+      if (view->model()->rowCount() > 0) {
+        view->setCurrentIndex(view->model()->index(0, 0));
+      }
+    } else {
+      for (int i = 0; i < view->model()->rowCount(); i++) {
+        auto index = view->model()->index(i, ssidColumn);
+        if (selected == index.data(Qt::DisplayRole).toString()) {
+          view->setCurrentIndex(index);
+          break;
+        }
       }
     }
   }
-}
 
-auto windowType() {
-  unsigned type = Qt::Dialog;
-  if (config().borderless) {
-    type |= Qt::FramelessWindowHint;
+  auto windowType() {
+    unsigned type = Qt::Dialog;
+    if (config().borderless) {
+      type |= Qt::FramelessWindowHint;
+    }
+    return Qt::WindowFlags(type);
   }
-  return Qt::WindowFlags(type);
-}
 } // namespace
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent, ::windowType()) {
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent, ::windowType()), creationTime_(QTime::currentTime()) {
   this->model_ = new NetworkTableModel();
 
   QObject::connect(&networking(), &Networking::wifiNetworksUpdated, this,
@@ -71,31 +72,35 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent, ::windowType()) {
 
   this->initLayout();
   this->setStyleSheet(theme().qss);
+
+  this->setMinimumSize({350, 400});
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *e) {
   switch (e->key()) {
-  case Qt::Key_Escape:
-  case Qt::Key_Q: {
-    this->close();
-  } break;
-  case Qt::Key_R:
-  case Qt::Key_F5: {
-    networking().queryWifiNetworks();
-  } break;
-  case Qt::Key_Enter:
-  case Qt::Key_Return:
-  case Qt::Key_Space: {
-    // select item
-    auto selected = selectedItem(this->wifiList_);
-    return_if(selected.isNull());
-    networking().connectWifi(selected);
-
-    // close on enter
-    if (e->key() != Qt::Key_Space) {
+    case Qt::Key_Escape:
+    case Qt::Key_Q: {
       this->close();
-    }
-  } break;
+    } break;
+    case Qt::Key_R:
+    case Qt::Key_F5: {
+      networking().queryWifiNetworks();
+    } break;
+    case Qt::Key_Enter:
+    case Qt::Key_Return:
+    case Qt::Key_Space: {
+      return_if(this->creationTime_.addSecs(2) > QTime::currentTime());
+
+      // select item
+      auto selected = selectedItem(this->wifiList_);
+      return_if(selected.isNull());
+      networking().connectWifi(selected);
+
+      // close on enter
+      if (e->key() != Qt::Key_Space) {
+        this->close();
+      }
+    } break;
   }
 }
 

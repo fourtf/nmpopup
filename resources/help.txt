@@ -1,0 +1,10 @@
+Usage: nm-popup [qt-options] [options]
+Qt-Options:
+  -style [style]       Selects a Qt style.
+  -stylesheet [path]   Loads a Qss Stylesheet for customizing the look of the
+                       Application, works similar to css.
+  (more Qt specific options may be available)
+Options:
+  --duplicates         Show duplicate SSID's.
+  --preserve-style     Disables the default theme modifications which make the
+                       ui darker.

@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>main-window.qss</file>
+        <file>dark.qss</file>
+        <file>help.txt</file>
     </qresource>
 </RCC>

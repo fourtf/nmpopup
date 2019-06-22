@@ -10,90 +10,89 @@
 #include "util.hpp"
 
 namespace {
+  class CliOutput {
+    std::vector<std::vector<QString>> rows_;
 
-class CliOutput {
-  std::vector<std::vector<QString>> rows_;
+  public:
+    QString raw;
 
-public:
-  QString raw;
+    CliOutput(const QString &value) : raw(value) {
+      // parse terse escaped string
+      std::vector<QString> row;
+      QString current;
 
-  CliOutput(const QString &value) : raw(value) {
-    // parse terse escaped string
-    std::vector<QString> row;
-    QString current;
-
-    for (int i = 0; i < value.length(); i++) {
-      if (value[i] == '\\' && i + 1 < value.length()) {
-        i++;
-        current += value[i];
-      } else if (value[i] == ':') {
-        row.push_back(current);
-        current = "";
-      } else if (value[i] == '\n') {
-        if (!current.isNull()) {
+      for (int i = 0; i < value.length(); i++) {
+        if (value[i] == '\\' && i + 1 < value.length()) {
+          i++;
+          current += value[i];
+        } else if (value[i] == ':') {
           row.push_back(current);
+          current = "";
+        } else if (value[i] == '\n') {
+          if (!current.isNull()) {
+            row.push_back(current);
+          }
+          this->rows_.push_back(std::move(row));
+        } else {
+          current += value[i];
         }
+      }
+      if (!current.isNull()) {
+        row.push_back(current);
+      }
+      if (!row.empty()) {
         this->rows_.push_back(std::move(row));
-      } else {
-        current += value[i];
       }
     }
-    if (!current.isNull()) {
-      row.push_back(current);
+
+    std::vector<QString> column(unsigned index) const {
+      std::vector<QString> result;
+
+      for (auto &&row : this->rows_) {
+        if (row.size() > index) {
+          result.push_back(row[index]);
+        }
+      }
+
+      return result;
     }
-    if (!row.empty()) {
-      this->rows_.push_back(std::move(row));
-    }
+
+    const std::vector<std::vector<QString>> rows() const { return this->rows_; }
+  };
+
+  CliOutput runCli(const QStringList &params) {
+    QProcess process;
+    process.start("nmcli", params);
+    process.waitForFinished();
+    auto arr = process.readAllStandardOutput();
+    auto str = QString(arr);
+
+    return {str};
   }
 
-  std::vector<QString> column(unsigned index) const {
-    std::vector<QString> result;
+  std::vector<WifiNetwork> parseWifiNetworks(QByteArray arr) {
+    auto output = CliOutput(QString(arr));
+    std::vector<WifiNetwork> result;
 
-    for (auto &&row : this->rows_) {
-      if (row.size() > index) {
-        result.push_back(row[index]);
+    QSet<QString> ssids;
+
+    for (auto &&row : output.rows()) {
+      continue_if(row.size() < 8);
+
+      if (!config().showDuplicates) {
+        if (ssids.contains(row[1])) {
+          continue;
+        }
+        ssids.insert(row[1]);
       }
+
+      // IN-USE SSID MODE CHAN RATE SIGNAL BARS SECURITY
+      result.push_back({row[0] == "*", row[1], row[2], row[3], row[4], row[5],
+                        row[6], row[7]});
     }
 
     return result;
   }
-
-  const std::vector<std::vector<QString>> rows() const { return this->rows_; }
-};
-
-CliOutput runCli(const QStringList &params) {
-  QProcess process;
-  process.start("nmcli", params);
-  process.waitForFinished();
-  auto arr = process.readAllStandardOutput();
-  auto str = QString(arr);
-
-  return {str};
-}
-
-std::vector<WifiNetwork> parseWifiNetworks(QByteArray arr) {
-  auto output = CliOutput(QString(arr));
-  std::vector<WifiNetwork> result;
-
-  QSet<QString> ssids;
-
-  for (auto &&row : output.rows()) {
-    continue_if(row.size() < 8);
-
-    if (!config().showDuplicates) {
-      if (ssids.contains(row[1])) {
-        continue;
-      }
-      ssids.insert(row[1]);
-    }
-
-    // IN-USE SSID MODE CHAN RATE SIGNAL BARS SECURITY
-    result.push_back({row[0] == "*", row[1], row[2], row[3], row[4], row[5],
-                      row[6], row[7]});
-  }
-
-  return result;
-}
 
 } // namespace
 

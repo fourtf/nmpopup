@@ -1,0 +1,5 @@
+QTableView {
+    background: #111;
+    color: #fff;
+    selection-background-color: #3961a3;
+}

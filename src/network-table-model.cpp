@@ -29,29 +29,29 @@ QVariant NetworkTableModel::data(const QModelIndex &index, int role) const {
     auto &&row = this->items_[size_t(index.row())];
 
     switch (index.column()) {
-    case 0:
-      return row.bars;
-    case 1:
-      return row.ssid;
-    case 2:
-      return row.security;
-    default:
-      return {};
+      case 0:
+        return row.bars;
+      case 1:
+        return row.ssid;
+      case 2:
+        return row.security;
+      default:
+        return {};
     }
   } else if (role == Qt::ForegroundRole) {
     auto &&row = this->items_[size_t(index.row())];
 
     switch (row.bars.count('_')) {
-    case 0:
-      return QColor("#3e2");
-    case 1:
-      return QColor("#9e2");
-    case 2:
-      return QColor("#c92");
-    case 3:
-      return QColor("#e34");
-    default:
-      return {};
+      case 0:
+        return QColor("#3e2");
+      case 1:
+        return QColor("#9e2");
+      case 2:
+        return QColor("#c92");
+      case 3:
+        return QColor("#e34");
+      default:
+        return {};
     }
   } else {
     return {};

@@ -1,7 +1,7 @@
 # About nm-popup
 
 This is a small gui utility to make switching wifi networks a bit more comfortable.
-It currently requires `nm-cli` in your path to get a list of networks and connect to them.
+It currently requires `nmcli` in your path to get a list of networks and connect to them.
 
 ![screenshot](./misc/screenshot001.png)
 

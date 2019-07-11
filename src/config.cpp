@@ -1,10 +1,17 @@
 #include "config.hpp"
 
 #include <QDebug>
+#include <QStandardPaths>
 #include <QStringList>
 #include <iostream>
 
-Config::Config() {}
+Config::Config()
+    : configBasePath(QStandardPaths::standardLocations(
+          QStandardPaths::AppConfigLocation)[0]),
+      ssids(this->configBasePath + "/config", QSettings::Format::IniFormat) {
+
+  qInfo() << "ssid save location (plain text): " << this->configBasePath;
+}
 
 Config &config() {
   static Config instance;
@@ -32,4 +39,12 @@ void Config::parse(const QStringList &args) {
     }
     // We skip commands that start with "-" since they might be qt arguments.
   }
+}
+
+QString Config::getPasswordForSsid(const QString &ssid) {
+  return this->ssids.value("ssids/" + ssid).toString();
+}
+
+void Config::setPasswordForSsid(const QString &ssid, const QString &password) {
+  this->ssids.setValue("ssids/" + ssid, password);
 }

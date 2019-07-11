@@ -5,9 +5,12 @@
 #include "config.hpp"
 #include "main-window.hpp"
 #include "networking.hpp"
+#include "password-dialog.hpp"
 #include "theme.hpp"
 
 int main(int argc, char *argv[]) {
+  QApplication::setApplicationName("nmpopup");
+
   // parse command line
   auto args = QStringList();
   std::transform(argv + 1, argv + argc, std::back_inserter(args),
@@ -23,6 +26,16 @@ int main(int argc, char *argv[]) {
         theme().installDarkTheme();
         theme().loadInternalDarkTheme();
       }
+
+      // password dialog
+      QObject::connect(&networking(), &Networking::passwordRequired,
+                       [](const QString &ssid) {
+                         showPasswordDialog(ssid, [](const QString &ssid,
+                                                     const QString &password) {
+                           config().setPasswordForSsid(ssid, password);
+                           networking().connectWifi(ssid, password);
+                         });
+                       });
 
       MainWindow w;
       w.show();

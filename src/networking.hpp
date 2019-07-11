@@ -28,6 +28,7 @@ public:
 
 signals:
   void wifiNetworksUpdated(const std::vector<WifiNetwork> &);
+  void passwordRequired(const QString &ssid);
 
 private:
   bool queryingNetworks_{};

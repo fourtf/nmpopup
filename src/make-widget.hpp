@@ -6,7 +6,6 @@
 
 class QBoxLayout;
 
-namespace ab {
 /// You may pass this to an element to ab::makeLayout to insert a stretch
 /// item.
 ///
@@ -30,12 +29,52 @@ class Space : public QWidget {
   Q_OBJECT
 };
 
+// function_traits is stolen from here:
+// https://stackoverflow.com/questions/7943525/is-it-possible-to-figure-out-the-parameter-type-and-return-type-of-a-lambda/7943765
+
+template <typename T>
+struct function_traits : public function_traits<decltype(&T::operator())> {};
+// For generic types, directly use the result of the signature of its
+// 'operator()'
+
+template <typename ClassType, typename ReturnType, typename... Args>
+struct function_traits<ReturnType (ClassType::*)(Args...) const>
+// we specialize for pointers to member function
+{
+  enum { arity = sizeof...(Args) };
+  // arity is the number of arguments.
+
+  typedef ReturnType result_type;
+
+  template <size_t i> struct arg {
+    typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
+    // the i-th argument is equivalent to the i-th tuple element of a tuple
+    // composed of those arguments.
+  };
+};
+
+/// Creates a new T(args...) with T = first argument of Func, and appies the
+/// function UnaryWith on it.
+///
+/// This allows for a "declarative" style of defining widgets/objects.
+template <typename UnaryWith, typename... Args>
+auto make(UnaryWith func, Args... args) {
+  using FuncArg1 = typename function_traits<UnaryWith>::template arg<0>::type;
+  using T = typename std::remove_pointer<FuncArg1>::type;
+
+  auto a = new T(std::forward<Args...>(args)...);
+  func(a);
+  return a;
+}
+
 /// Creates a widget of type T, and applies the function UnaryWith on it.
 ///
 /// This allows for a "declarative" style of defining layouts and widget
 /// children.
-template <typename T, typename UnaryWith> T *makeWidget(UnaryWith with) {
-  auto t = new T;
+
+template <typename T, typename UnaryWith, typename... TArgs>
+T *makeWidget(UnaryWith with, TArgs... args) {
+  auto t = new T(std::forward<TArgs...>(args)...);
 
   with(t);
 
@@ -83,4 +122,3 @@ T *makeLayout(UnaryWith with, std::initializer_list<QObject *> widgets) {
 
   return t;
 }
-} // namespace ab

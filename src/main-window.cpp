@@ -51,6 +51,10 @@ namespace {
     }
     return Qt::WindowFlags(type);
   }
+
+  void connectWifi(const QString &ssid) {
+    networking().connectWifi(ssid, config().getPasswordForSsid(ssid));
+  }
 } // namespace
 
 MainWindow::MainWindow(QWidget *parent)
@@ -89,26 +93,27 @@ void MainWindow::keyReleaseEvent(QKeyEvent *e) {
     case Qt::Key_Enter:
     case Qt::Key_Return:
     case Qt::Key_Space: {
-      return_if(this->creationTime_.addSecs(2) > QTime::currentTime());
+      return_if(this->creationTime_.addSecs(1) > QTime::currentTime());
 
       // select item
       auto selected = selectedItem(this->wifiList_);
       return_if(selected.isNull());
-      networking().connectWifi(selected);
+      connectWifi(selected);
 
       // close on enter
       if (e->key() != Qt::Key_Space) {
-        this->close();
+        // this->close();
       }
     } break;
   }
 }
 
 void MainWindow::initLayout() {
-  this->setCentralWidget(ab::makeWidget<QWidget>([=](QWidget *w) {
-    w->setLayout(ab::makeLayout<QVBoxLayout>({
+  this->setCentralWidget(make([=](QWidget *w) {
+    // vertical layout
+    w->setLayout(makeLayout<QVBoxLayout>({
         // table view containing list of wifi networks
-        ab::makeWidget<QTableView>([=](QTableView *w) {
+        make([=](QTableView *w) {
           this->wifiList_ = w;
           w->setSelectionBehavior(QAbstractItemView::SelectRows);
           w->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -124,7 +129,7 @@ void MainWindow::initLayout() {
           QObject::connect(
               w, &QTableView::doubleClicked, this,
               [=](const QModelIndex &index) {
-                networking().connectWifi(
+                connectWifi(
                     index.siblingAtColumn(ssidColumn).data().toString());
               });
         }),

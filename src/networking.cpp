@@ -45,6 +45,7 @@ namespace {
       }
     }
 
+    /*
     std::vector<QString> column(unsigned index) const {
       std::vector<QString> result;
 
@@ -56,6 +57,7 @@ namespace {
 
       return result;
     }
+    */
 
     const std::vector<std::vector<QString>> rows() const { return this->rows_; }
   };
@@ -132,7 +134,25 @@ void Networking::queryWifiNetworks(bool rescan) {
 }
 
 void Networking::connectWifi(const QString &ssid, const QString &password) {
-  QProcess::startDetached("nmcli", {"device", "wifi", "connect", ssid});
+  auto process = new QProcess;
+
+  QObject::connect(process, qOverload<int>(&QProcess::finished), this,
+                   [this, ssid, process](int) {
+                     auto str = QString(process->readAllStandardOutput());
+
+                     if (str.toLower().contains("error") &&
+                         str.contains("(7)")) {
+                       emit this->passwordRequired(ssid);
+                     }
+                     process->deleteLater();
+                   });
+
+  if (password.isEmpty()) {
+    process->start("nmcli", {"device", "wifi", "connect", ssid});
+  } else {
+    process->start("nmcli",
+                   {"device", "wifi", "connect", ssid, "password", password});
+  }
 }
 
 Networking &networking() {

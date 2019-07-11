@@ -23,6 +23,7 @@ SOURCES += \
         src/make-widget.cpp \
         src/network-table-model.cpp \
         src/networking.cpp \
+        src/password-dialog.cpp \
         src/theme.cpp
 
 HEADERS += \
@@ -32,6 +33,7 @@ HEADERS += \
         src/make-widget.hpp \
         src/network-table-model.hpp \
         src/networking.hpp \
+        src/password-dialog.hpp \
         src/theme.hpp \
         src/util.hpp
 
